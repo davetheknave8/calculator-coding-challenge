@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // our localhost port
-const port = 4001
+
 
 
 // Post Route
@@ -57,4 +57,6 @@ io.on('connection', socket => {
   })
 })
 
-server.listen(process.env.PORT || port, () => console.log(`Listening on port ${port}`))
+const PORT = process.env.PORT || 4001
+
+server.listen(PORT, () => console.log(`Listening on port ${PORT}`))
