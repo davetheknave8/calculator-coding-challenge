@@ -6,22 +6,41 @@ import axios from 'axios';
 //Material-UI
 import Fab from '@material-ui/core/Fab';
 import {withStyles} from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
+
+
+//To determine which step of the Calculation the user is at
+let calcLevel = 0;
 
 const styles = theme => ({
-  buttons: {
-    margin: theme.spacing.unit
-  }
+  button: {
+    margin: theme.spacing.unit,
+    disabled: true
+  },
+  allBtn: {
+
+  },
+  calculator: {
+    width: '35%',
+    margin: 'auto'
+  },
 })
 
 class App extends Component {
   constructor() {
     super();
     this.state = {
-      endpoint: "localhost:4001",
+      endpoint: process.env.PORT || "localhost:4001",
 
       ///
       history: [],
-      color: 'white'
+      newCalculation: {
+        numOne: null,
+        numTwo: null,
+        operator: null
+      }, 
+      calculation: '',
+      total: 0
       ///
 
     };
@@ -35,8 +54,56 @@ class App extends Component {
   ///
 
   // adding the function
-  setColor = (color) => {
-    this.setState({ color })
+  //Sets num in state( newCalculation), checking the calclevel to see which number should be changed in state
+  setNum = (num) => {
+    if(calcLevel === 3){
+      this.clear();
+      return
+    }
+    this.setState({total: 0})
+    if(this.state.newCalculation.numOne === null && calcLevel === 0 && num !== '0'){
+      this.setState({ newCalculation: {...this.state.newCalculation, numOne: num}, calculation: this.state.calculation + num })
+    } else if (this.state.newCalculation.numOne && calcLevel === 0) {
+      this.setState({ newCalculation: { ...this.state.newCalculation, numOne: this.state.newCalculation.numOne + num }, calculation: this.state.calculation + num})
+    } else if (this.state.newCalculation.numTwo === null && calcLevel === 1 && num !== '0'){
+      this.setState({ newCalculation: { ...this.state.newCalculation, numTwo: num }, calculation: this.state.calculation + num })
+    } else if (this.state.newCalculation.numTwo && calcLevel === 1){
+      this.setState({ newCalculation: { ...this.state.newCalculation, numTwo: this.state.newCalculation.numTwo + num }, calculation: this.state.calculation + num })
+    }
+  }
+
+  //Sets operator in state (newCalculation);
+  setOp = (op) => {
+    if(!this.state.newCalculation.operator && this.state.newCalculation.numOne){
+      this.setState({newCalculation: {...this.state.newCalculation, operator: op}, calculation: this.state.calculation + op})
+      calcLevel = 1;
+    }
+  }
+
+  //Submits user calculation to the database to be shown instantly to all users
+  submitCalculation = () => {
+    calcLevel = 3;
+    axios.post('/calculate', this.state.newCalculation)
+      .then(response => {
+        const socket = socketIOClient(this.state.endpoint);
+        socket.emit('get_history')
+      })
+    if(this.state.newCalculation.operator === '+'){
+      this.setState({total: (Number(this.state.newCalculation.numOne) + Number(this.state.newCalculation.numTwo))})
+    } else if (this.state.newCalculation.operator === '-') {
+      this.setState({ total: (Number(this.state.newCalculation.numOne) - Number(this.state.newCalculation.numTwo)) })
+    } else if (this.state.newCalculation.operator === '*') {
+      this.setState({ total: (Number(this.state.newCalculation.numOne) * Number(this.state.newCalculation.numTwo)) })
+    } else if (this.state.newCalculation.operator === '/') {
+      this.setState({ total: (Number(this.state.newCalculation.numOne) / Number(this.state.newCalculation.numTwo)) })
+    }
+  }
+
+
+  //Resets Calculator without sending to database
+  clear = () => {
+    this.setState({newCalculation: {numOne: null, numTwo: null, operator: null}, calculation: '', total: 0})
+    calcLevel = 0;
   }
 
   componentDidMount = () => {
@@ -52,23 +119,38 @@ class App extends Component {
     // testing for socket connections
     const {classes} = this.props;
     const socket = socketIOClient(this.state.endpoint);
-    console.log(this.state.history);
+    console.log(this.state.newCalculation);
     return (
       <div style={{ textAlign: "center" }}>
         <button onClick={() => this.send() }>Send Test</button>
         <div className={classes.calculator}>
-          <div className={classes.buttons}></div>
-          <Fab className={classes.buttons}>7</Fab>
-          <Fab className={classes.buttons}>8</Fab>
-          <Fab className={classes.buttons}>9</Fab>
-          <br />
-          <Fab className={classes.buttons}>4</Fab>
-          <Fab className={classes.buttons}>5</Fab>
-          <Fab className={classes.buttons}>6</Fab>
-          <br />
-          <Fab className={classes.buttons}>1</Fab>
-          <Fab className={classes.buttons}>2</Fab>
-          <Fab className={classes.buttons}>3</Fab>
+          <TextField disabled variant="outlined" style={{width: '70%'}}
+          value={
+            this.state.total !== 0 ? this.state.total : this.state.calculation
+          } />
+          <Fab onClick={() => this.clear()} size="small" className={classes.button}>C</Fab>
+          <div className={classes.allBtn}>
+            <Fab onClick={() => this.setNum('7')} className={classes.button}>7</Fab>
+            <Fab onClick={() => this.setNum('8')} className={classes.button}>8</Fab>
+            <Fab onClick={() => this.setNum('9')} className={classes.button}>9</Fab>
+            <Fab onClick={() => this.setOp('+')} className={classes.button}>+</Fab>
+            <br />
+            <Fab onClick={() => this.setNum('4')} className={classes.button}>4</Fab>
+            <Fab onClick={() => this.setNum('5')} className={classes.button}>5</Fab>
+            <Fab onClick={() => this.setNum('6')} className={classes.button}>6</Fab>
+            <Fab onClick={() => this.setOp('-')} className={classes.button}>-</Fab>
+            <br />
+            <Fab onClick={() => this.setNum('1')} className={classes.button}>1</Fab>
+            <Fab onClick={() => this.setNum('2')} className={classes.button}>2</Fab>
+            <Fab onClick={() => this.setNum('3')} className={classes.button}>3</Fab>
+            <Fab onClick={() => this.setOp('*')} className={classes.button}>*</Fab>
+            <br />
+            <Fab onClick={() => this.setNum('0')} className={classes.button}>0</Fab>
+            <Fab onClick={() => this.setNum('.')} className={classes.button}>.</Fab>
+            <Fab onClick={() => this.submitCalculation()} className={classes.button}>=</Fab>
+            <Fab onClick={() => this.setOp('/')} className={classes.button}>/</Fab>
+
+          </div>
         </div>
         {this.state.history.map((calc, i) => <CalcListItem key={i} calc={calc} />)}
       </div>

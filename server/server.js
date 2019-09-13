@@ -2,12 +2,32 @@ const express = require('express')
 const pool = require('./modules/pool');
 const http = require('http')
 const socketIO = require('socket.io')
+const bodyParser = require('body-parser');
+
+
+const app = express()
+//Body Parser Middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // our localhost port
 const port = 4001
 
-const app = express()
 
+// Post Route
+app.post('/calculate', (req, res) => {
+    console.log(req.body);
+    const sqlText = `INSERT INTO history(num_one, num_two, operator)
+        VALUES($1, $2, $3);`;
+    const values = [req.body.numOne, req.body.numTwo, req.body.operator]
+    pool.query(sqlText, values)
+        .then(response => {
+            res.sendStatus(200)
+        })
+        .catch(error => {
+            console.log('error updating history', error);
+        })
+})
 // our server instance
 const server = http.createServer(app)
 
