@@ -56,7 +56,7 @@ class App extends Component {
 
   // sending sockets
   send = () => {
-    const socket = socketIOClient(this.state.endpoint, {transports: ['websocket']});
+    const socket = socketIOClient(this.state.endpoint, { transports: ['websocket'], upgrade: false});
     socket.emit('get_history') // change 'red' to this.state.color
   }
   ///
@@ -93,7 +93,7 @@ class App extends Component {
     calcLevel = 3;
     axios.post('/calculate', this.state.newCalculation)
       .then(response => {
-        const socket = socketIOClient(this.state.endpoint, { transports: ['websocket'] });
+        const socket = socketIOClient(this.state.endpoint, { transports: ['websocket'], upgrade: false });
         socket.emit('get_history')
       })
     if(this.state.newCalculation.operator === '+'){
@@ -115,7 +115,7 @@ class App extends Component {
   }
 
   componentDidMount = () => {
-    const socket = socketIOClient(this.state.endpoint, { transports: ['websocket'] });
+    const socket = socketIOClient(this.state.endpoint, { transports: ['websocket'], upgrade: false });
       setInterval(this.send(), 1000)
       socket.on('get_history', (response) => {
           this.setState({history: response})
@@ -125,7 +125,7 @@ class App extends Component {
   render() {
     // testing for socket connections
     const {classes} = this.props;
-    const socket = socketIOClient(this.state.endpoint, { transports: ['websocket'] });
+    const socket = socketIOClient(this.state.endpoint, { transports: ['websocket'], upgrade: false });
     console.log(this.state.newCalculation);
     return (
       <div style={{ textAlign: "center" }}>
