@@ -40,7 +40,8 @@ io.on('connection', socket => {
   
   // just like on the client side, we have a socket.on method that takes a callback function
   socket.on('get_history', () => {
-      pool.query(`SELECT * FROM history;`)
+      pool.query(`SELECT * FROM history
+                    ORDER BY id DESC LIMIT 10;`)
         .then(response => {
             console.log(response.rows);
             io.sockets.emit('get_history', response.rows)
