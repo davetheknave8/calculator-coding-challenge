@@ -21,9 +21,17 @@ const styles = theme => ({
 
   },
   calculator: {
-    width: '35%',
-    margin: 'auto'
+    width: '20%',
+    margin: 'auto',
+    display: 'inline-block',
   },
+  history: {
+    width: '20%',
+    height: '50%',
+    border: 'solid',
+    float: 'right',
+    marginRight: '18%'
+  }
 })
 
 class App extends Component {
@@ -111,8 +119,7 @@ class App extends Component {
       setInterval(this.send(), 1000)
       socket.on('get_history', (response) => {
           this.setState({history: response})
-          
-      })
+        })
   }
 
   render() {
@@ -122,7 +129,7 @@ class App extends Component {
     console.log(this.state.newCalculation);
     return (
       <div style={{ textAlign: "center" }}>
-        <button onClick={() => this.send() }>Send Test</button>
+        <h1>Calculator</h1>
         <div className={classes.calculator}>
           <TextField disabled variant="outlined" style={{width: '70%'}}
           value={
@@ -152,7 +159,10 @@ class App extends Component {
 
           </div>
         </div>
-        {this.state.history.map((calc, i) => <CalcListItem key={i} calc={calc} />)}
+        <div className={classes.history}>
+          <h2>History</h2>
+          {this.state.history.map((calc, i) => <CalcListItem key={i} calc={calc} />)}
+        </div>
       </div>
     )
   }
