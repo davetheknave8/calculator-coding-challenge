@@ -38,7 +38,7 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      endpoint: process.env.PORT || "localhost:4001",
+      endpoint: process.env.PORT ? `https://calm-atoll-64797.herokuapp.com/${process.env.PORT}` : "localhost:4001",
 
       ///
       history: [],
