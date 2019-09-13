@@ -54,6 +54,12 @@ class App extends Component {
     };
   }
 
+  componentDidUpdate = (prevProps, prevState) => {
+    if(prevState.history !== this.state.history){
+      this.setState({state: this.state})
+    }
+  }
+
   // sending sockets
   send = () => {
     this.socket.emit('get_history') // change 'red' to this.state.color
@@ -158,7 +164,7 @@ class App extends Component {
         </div>
         <div className={classes.history}>
           <h2>History</h2>
-          {this.state.history.map((calc, i) => <CalcListItem key={i} calc={calc} />)}
+          {this.state.history.map((calc, i) => <CalcListItem key={i} calc={calc} history={this.state.history} />)}
         </div>
       </div>
     )

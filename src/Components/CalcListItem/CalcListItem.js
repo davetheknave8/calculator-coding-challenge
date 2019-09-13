@@ -9,6 +9,12 @@ class CalcListItem extends Component{
         this.getTotal();
     }
 
+    componentDidUpdate = (prevProps) => {
+        if(prevProps.history !== this.props.history){
+            this.getTotal();
+        }
+    }
+
     getTotal = () => {
         if(this.props.calc.operator === '+'){
             this.setState({total: (this.props.calc.num_one + this.props.calc.num_two)})
@@ -22,6 +28,7 @@ class CalcListItem extends Component{
     }
 
     render(){
+        console.log(this.state.total);
         return(
             <>
                 <p>{this.props.calc.num_one} {this.props.calc.operator} {this.props.calc.num_two} = {this.state.total}</p>
