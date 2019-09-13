@@ -32,9 +32,7 @@ app.post('/calculate', (req, res) => {
 const server = http.createServer(app)
 
 // This creates our socket using the instance of the server
-const io = socketIO(server)
-
-io.set('tranports', ['websockets']);
+const io = socketIO(server, {transports: ['websockets']})
 
 // This is what the socket.io syntax is like, we will work this later
 io.on('connection', socket => {
