@@ -38,7 +38,7 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      endpoint: `wss://calm-atoll-64797.herokuapp.com`,
+      endpoint: `wss://calm-atoll-64797.herokuapp.com:49185`,
 
       ///
       history: [],
